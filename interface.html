@@ -1,0 +1,48 @@
+<html>
+<head>
+	<title>Shell</title>
+	<style>
+		.error{
+			color:#FF0000;
+		}
+	</style>
+</head>
+<body>
+	<h1 id="connection">Attempting connection...</h1>
+	<input type="text" id="command" name="command">
+	<button class="post" onclick="sendreq()">Send request</button>
+	<pre id="msg"></pre>
+</body>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+	var socket = io.connect("127.0.0.1:3000");
+	socket.on("connection_status", function(data){
+		document.getElementById("connection").innerHTML = data['status'];
+	});
+	socket.on("msg", function(data){
+		var str;
+		if(data['error']){
+			str = '<span class="error">Error : '+data['error']+'</span>';			
+		} else {
+			str = data['data'];
+		}
+		document.getElementById("msg").innerHTML = document.getElementById("msg").innerHTML+str;
+	})
+	document.getElementById('command').onkeypress = function(e){
+		if (!e) e = window.event;
+		var keyCode = e.keyCode || e.which;
+		if (keyCode == '13'){
+			sendreq();
+			return false;
+		}
+	}
+	function sendreq(){
+		var c = document.getElementById("command").value;
+		if(c === "clear"){
+			document.getElementById("msg").innerHTML = "";
+		} else {			
+			socket.emit("req", {command : c});
+		}
+	}
+</script>
+</html>
