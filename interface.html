@@ -15,9 +15,10 @@
 </body>
 <script src="/socket.io/socket.io.js"></script>
 <script>
-	var socket = io.connect("127.0.0.1:3000");
+	var socket = io.connect(window.location.host);
 	socket.on("connection_status", function(data){
 		document.getElementById("connection").innerHTML = data['status'];
+		document.getElementById("command").disabled = false;
 	});
 	socket.on("msg", function(data){
 		var str;
@@ -27,7 +28,11 @@
 			str = data['data'];
 		}
 		document.getElementById("msg").innerHTML = document.getElementById("msg").innerHTML+str;
-	})
+	});
+	socket.on("disconnect", function(data){
+		document.getElementById("connection").innerHTML = "Disconnected";		
+		document.getElementById("command").disabled = true;
+	});
 	document.getElementById('command').onkeypress = function(e){
 		if (!e) e = window.event;
 		var keyCode = e.keyCode || e.which;
@@ -43,6 +48,7 @@
 		} else {			
 			socket.emit("req", {command : c});
 		}
+		document.getElementById("command").value = '';
 	}
 </script>
 </html>
